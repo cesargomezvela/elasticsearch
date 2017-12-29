@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
       - name: elasticsearch-data
-        image: 192.168.201.22:30007/evertec/k8s/elasticsearch:6.1.1
+        image: k8s/elasticsearch:6.1.1
         env:
         - name: NAMESPACE
           valueFrom:
@@ -50,7 +50,7 @@ spec:
         - name: HTTP_ENABLE
           value: "false"
         - name: ES_JAVA_OPTS
-          value: -Xms512m -Xmx512m
+          value: -Xms256m -Xmx256m
         ports:
         - containerPort: 9300
           name: transport
@@ -64,8 +64,6 @@ spec:
           mountPath: /data
         securityContext:
           privileged: true
-      imagePullSecrets:
-        - name: pull-regitry-keys
       volumes:
           - emptyDir:
               medium: ""

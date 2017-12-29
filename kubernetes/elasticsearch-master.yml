@@ -1,0 +1,74 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: elasticsearch-master
+  labels:
+    component: elasticsearch
+    role: master
+spec:
+  replicas: 3
+  template:
+    metadata:
+      annotations:
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+            "name":"init-sysctl",
+            "image":"192.168.201.22:30007/busybox:1.27.2",
+            "imagePullPolicy":"IfNotPresent",
+            "command":[
+              "sysctl",
+              "-w",
+              "vm.max_map_count=262144"
+            ],
+            "securityContext":{
+                "privileged":true
+            }
+          }
+        ]'
+      labels:
+        component: elasticsearch
+        role: master
+    spec:
+      containers:
+      - name: elasticsearch-master
+        image: 192.168.201.22:30007/evertec/k8s/elasticsearch:6.1.1
+        env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: CLUSTER_NAME
+          value: myesdb
+        - name: NUMBER_OF_MASTERS
+          value: "2"
+        - name: NODE_MASTER
+          value: "true"
+        - name: NODE_INGEST
+          value: "false"
+        - name: NODE_DATA
+          value: "false"
+        - name: HTTP_ENABLE
+          value: "false"
+        - name: ES_JAVA_OPTS
+          value: -Xms512m -Xmx512m
+        ports:
+        - containerPort: 9300
+          name: transport
+        livenessProbe:
+          tcpSocket:
+            port: transport
+        volumeMounts:
+        - name: storage
+          mountPath: /data
+        securityContext:
+          privileged: true
+      imagePullSecrets:
+        - name: pull-regitry-keys
+      volumes:
+          - emptyDir:
+              medium: ""
+            name: "storage"

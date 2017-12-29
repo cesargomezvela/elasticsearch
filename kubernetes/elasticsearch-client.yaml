@@ -13,7 +13,7 @@ spec:
         pod.alpha.kubernetes.io/init-containers: '[
           {
             "name":"init-sysctl",
-            "image":"192.168.201.22:30007/busybox:1.27.2",
+            "image":"busybox:1.27.2",
             "imagePullPolicy":"IfNotPresent",
             "command":[
               "sysctl",
